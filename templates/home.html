@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block title %}Home | DijiKala{% endblock %}
+{% block content %}
+<h2>🛒 Latest Products</h2>
+<div class="card-grid">
+    {% for product in products %}
+        <div class="card">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="https://via.placeholder.com/300x200?text=No+Image" alt="No image">
+            {% endif %}
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description|truncatewords:12 }}</p>
+            <p><strong>${{ product.price }}</strong></p>
+        </div>
+    {% empty %}
+        <p>No products yet!</p>
+    {% endfor %}
+</div>
+{% endblock %}
