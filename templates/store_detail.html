@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ store.name }} | DijiKala{% endblock %}
+
+{% block content %}
+<div class="store-header">
+    <h2>{{ store.name }}</h2>
+    <p>{{ store.description }}</p>
+
+    {% if user == store.owner.user %}
+        <a href="{% url 'add_product' store.id %}" class="btn">+ Add Product</a>
+    {% endif %}
+</div>
+
+<hr>
+
+<div class="card-grid">
+    {% for product in products %}
+        <div class="card">
+            {% if product.image %}
+                <img src="{{ product.image.url }}" alt="{{ product.name }}">
+            {% else %}
+                <img src="{% static 'images/default_product.jpg' %}" alt="No image">
+            {% endif %}
+            <h3>{{ product.name }}</h3>
+            <p>{{ product.description|truncatewords:12 }}</p>
+            <p><strong>${{ product.price }}</strong></p>
+
+            {% if user.is_authenticated %}
+                <a href="{% url 'add_to_cart' product.id %}" class="btn">Add to Cart</a>
+            {% else %}
+                <p><a href="{% url 'login' %}">Login to Buy</a></p>
+            {% endif %}
+        </div>
+    {% empty %}
+        <p>No products in this store yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

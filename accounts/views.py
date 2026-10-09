@@ -1,8 +1,12 @@
-from django.contrib.auth import authenticate, login, logout
+from decimal import Decimal, InvalidOperation
+
+from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 
 from .forms import SignupForm
+from .models import CustomerProfile
 
 
 def signup_view(request):
@@ -19,7 +23,11 @@ def signup_view(request):
     else:
         form = SignupForm()
 
-    return render(request, 'accounts/signup.html', {'form': form})
+    return render(
+        request,
+        'registration/signup.html',
+        {'form': form}
+    )
 
 
 def login_view(request):
@@ -27,26 +35,22 @@ def login_view(request):
         return redirect('home')
 
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
-
-        user = authenticate(
+        form = AuthenticationForm(
             request,
-            username=username,
-            password=password
+            data=request.POST
         )
 
-        if user is not None:
-            login(request, user)
+        if form.is_valid():
+            login(request, form.get_user())
             return redirect('home')
+    else:
+        form = AuthenticationForm()
 
-        return render(
-            request,
-            'accounts/login.html',
-            {'error': 'Username or password is incorrect.'}
-        )
-
-    return render(request, 'accounts/login.html')
+    return render(
+        request,
+        'registration/login.html',
+        {'form': form}
+    )
 
 
 @login_required
@@ -57,9 +61,47 @@ def logout_view(request):
 
 @login_required
 def customer_panel(request):
-    return render(request, 'accounts/customer_panel.html')
+    customer = CustomerProfile.objects.filter(
+        user=request.user
+    ).first()
+
+    if customer is None:
+        return redirect('seller_panel')
+
+    return render(
+        request,
+        'customer_panel.html',
+        {'customer': customer}
+    )
 
 
 @login_required
 def seller_panel(request):
-    return render(request, 'accounts/seller_panel.html')
+    return render(request, 'seller_panel.html')
+
+
+@login_required
+def payment_view(request):
+    customer = CustomerProfile.objects.filter(
+        user=request.user
+    ).first()
+
+    if customer is None:
+        return redirect('seller_panel')
+
+    if request.method == 'POST':
+        try:
+            amount = Decimal(request.POST.get('amount', '0'))
+        except (InvalidOperation, TypeError):
+            amount = Decimal('0')
+
+        if amount.is_finite() and amount > 0:
+            customer.balance += amount
+            customer.save(update_fields=['balance'])
+            return redirect('customer_panel')
+
+    return render(
+        request,
+        'payment.html',
+        {'customer': customer}
+    )

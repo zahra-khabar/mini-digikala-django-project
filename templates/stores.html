@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+{% block title %}Stores | DijiKala{% endblock %}
+
+{% block content %}
+<h2>🏪 All Stores</h2>
+<div class="card-grid">
+    {% for store in stores %}
+        <div class="card">
+            <h3>{{ store.name }}</h3>
+            <p>{{ store.description|truncatewords:15 }}</p>
+            <a href="{% url 'store_detail' store.id %}" class="btn">Visit Store</a>
+        </div>
+    {% empty %}
+        <p>No stores available.</p>
+    {% endfor %}
+</div>
+{% endblock %}

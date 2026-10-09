@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Cart | DijiKala{% endblock %}
+
+{% block content %}
+<h2>🛒 Your Cart</h2>
+
+{% if cart_items %}
+    <table class="cart-table">
+        <thead>
+            <tr>
+                <th>Product</th>
+                <th>Store</th>
+                <th>Price</th>
+                <th>Quantity</th>
+                <th>Remove</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+                <tr>
+                    <td>{{ item.product.name }}</td>
+                    <td>{{ item.product.store.name }}</td>
+                    <td>${{ item.product.price }}</td>
+                    <td>{{ item.quantity }}</td>
+                    <td><a href="{% url 'remove_from_cart' item.id %}">❌</a></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <p><strong>Total:</strong> ${{ total }}</p>
+    <a href="{% url 'checkout' %}" class="btn">✅ Checkout</a>
+
+{% else %}
+    <p>Your cart is empty.</p>
+{% endif %}
+{% endblock %}

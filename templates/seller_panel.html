@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Seller Panel | DijiKala{% endblock %}
+
+{% block content %}
+<h2>👨‍💼 Seller Panel</h2>
+
+
+<div class="card-grid" style="margin-top: 20px;">
+    {% for store in stores %}
+        <div class="card">
+            <h3>{{ store.name }}</h3>
+            <p>{{ store.description|truncatewords:15 }}</p>
+            <a href="{% url 'store_detail' store.id %}" class="btn">Manage Store</a>
+        </div>
+    {% empty %}
+        <p>You have no stores yet.</p>
+    {% endfor %}
+</div>
+{% endblock %}

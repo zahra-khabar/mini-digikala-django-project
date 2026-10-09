@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Customer Panel | DijiKala{% endblock %}
+
+{% block content %}
+<h2>👤 Customer Panel</h2>
+
+<div class="card" style="max-width: 400px;">
+    <p><strong>Name:</strong> {{ customer.user.username }}</p>
+    <p><strong>Phone:</strong> {{ customer.phone }}</p>
+    <p><strong>Customer ID:</strong> {{ customer.id }}</p>
+    <p><strong>Balance:</strong> ${{ customer.balance }}</p>
+
+    <div style="margin-top: 10px;">
+        <a href="{% url 'payment' %}" class="btn">💳 Increase Balance</a>
+        <a href="{% url 'cart' %}" class="btn">🛒 View Cart</a>
+        <a href="{% url 'order_history' %}" class="btn">📜 Order History</a>
+    </div>
+</div>
+{% endblock %}
