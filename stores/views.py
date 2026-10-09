@@ -10,7 +10,7 @@ def stores_list(request):
     stores = Store.objects.all()
     return render(request,'stores/stores.html',{'stores':stores})
 
-def store_details(request,store_id):
+def store_detail(request,store_id):
     """Details of custom store with their products"""
     store = get_object_or_404(Store,id=store_id)
     products = store.products.all()
