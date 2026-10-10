@@ -78,6 +78,32 @@ def remove_from_cart(request, item_id):
 
 @login_required
 @require_POST
+def update_cart_item(request, item_id):
+    customer = getattr(request.user, 'customerprofile', None)
+
+    if customer is None:
+        return redirect('home')
+
+    item = get_object_or_404(
+        CartItem,
+        pk=item_id,
+        customer=customer
+    )
+
+    action = request.POST.get('action')
+
+    if action == 'increase':
+        item.quantity += 1
+        item.save(update_fields=['quantity'])
+    elif action == 'decrease' and item.quantity > 1:
+        item.quantity -= 1
+        item.save(update_fields=['quantity'])
+
+    return redirect('cart')
+
+
+@login_required
+@require_POST
 def checkout(request):
     with transaction.atomic():
         customer = CustomerProfile.objects.select_for_update().filter(
