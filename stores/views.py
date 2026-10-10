@@ -38,7 +38,10 @@ def create_store(request):
     seller = getattr(request.user, 'sellerprofile', None)
 
     if seller is None:
-        messages.error(request, 'Only seller accounts can create stores.')
+        messages.error(
+            request,
+            'فقط حساب‌های فروشنده می‌توانند فروشگاه بسازند.'
+        )
         return redirect('customer_panel')
 
     if request.method == 'POST':
@@ -66,7 +69,7 @@ def add_product(request, store_id):
 
     if seller is None or store.owner_id != seller.pk:
         return HttpResponseForbidden(
-            'You can only manage products of your own stores.'
+            'فقط می‌توانید محصولات فروشگاه‌های خودتان را مدیریت کنید.'
         )
 
     if request.method == 'POST':
@@ -95,7 +98,7 @@ def edit_product(request, store_id, product_id):
 
     if seller is None or store.owner_id != seller.pk:
         return HttpResponseForbidden(
-            'You can only manage products of your own stores.'
+            'فقط می‌توانید محصولات فروشگاه‌های خودتان را مدیریت کنید.'
         )
 
     if request.method == 'POST':
@@ -127,7 +130,7 @@ def delete_product(request, store_id, product_id):
 
     if seller is None or store.owner_id != seller.pk:
         return HttpResponseForbidden(
-            'You can only manage products of your own stores.'
+            'فقط می‌توانید محصولات فروشگاه‌های خودتان را مدیریت کنید.'
         )
 
     try:
@@ -135,11 +138,11 @@ def delete_product(request, store_id, product_id):
     except ProtectedError:
         messages.error(
             request,
-            'This product has orders and cannot be deleted.'
+            'این محصول سفارش ثبت‌شده دارد و قابل حذف نیست.'
         )
         return redirect('store_detail', store_id=store.pk)
 
-    messages.success(request, 'Product deleted.')
+    messages.success(request, 'محصول حذف شد.')
 
     return redirect('store_detail', store_id=store.pk)
 
@@ -149,7 +152,10 @@ def seller_panel(request):
     seller = getattr(request.user, 'sellerprofile', None)
 
     if seller is None:
-        messages.error(request, 'Only seller accounts have a seller panel.')
+        messages.error(
+            request,
+            'پنل فروشنده فقط برای حساب‌های فروشنده است.'
+        )
         return redirect('customer_panel')
 
     stores = seller.stores.all()

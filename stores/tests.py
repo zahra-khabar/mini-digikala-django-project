@@ -202,5 +202,5 @@ class StoreManagementTests(TestCase):
 
         response = self.client.get(reverse('home'))
 
-        self.assertContains(response, 'No image available')
+        self.assertContains(response, 'بدون تصویر')
         self.assertNotContains(response, 'products/missing.webp')

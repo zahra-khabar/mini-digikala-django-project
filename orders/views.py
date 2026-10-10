@@ -17,13 +17,16 @@ def add_to_cart(request, product_id):
     customer = getattr(request.user, 'customerprofile', None)
 
     if customer is None:
-        messages.error(request, 'Only customer accounts can buy products.')
+        messages.error(
+            request,
+            'فقط حساب‌های مشتری می‌توانند خرید کنند.'
+        )
         return redirect('home')
 
     product = get_object_or_404(Product, pk=product_id)
 
     if product.stock < 1:
-        messages.error(request, 'This product is out of stock.')
+        messages.error(request, 'این محصول موجود نیست.')
         return redirect('cart')
 
     item, created = CartItem.objects.get_or_create(
@@ -36,14 +39,14 @@ def add_to_cart(request, product_id):
         if item.quantity + 1 > product.stock:
             messages.error(
                 request,
-                'Not enough stock for this product.'
+                'موجودی این محصول کافی نیست.'
             )
             return redirect('cart')
 
         item.quantity += 1
         item.save(update_fields=['quantity'])
 
-    messages.success(request, 'Product added to your cart.')
+    messages.success(request, 'محصول به سبد خرید اضافه شد.')
 
     return redirect('cart')
 
@@ -53,7 +56,10 @@ def cart_view(request):
     customer = getattr(request.user, 'customerprofile', None)
 
     if customer is None:
-        messages.error(request, 'Only customer accounts have a cart.')
+        messages.error(
+            request,
+            'سبد خرید فقط برای حساب‌های مشتری است.'
+        )
         return redirect('home')
 
     cart_items = CartItem.objects.filter(
@@ -109,7 +115,7 @@ def update_cart_item(request, item_id):
         if item.quantity >= item.product.stock:
             messages.error(
                 request,
-                'Not enough stock for this product.'
+                'موجودی این محصول کافی نیست.'
             )
         else:
             item.quantity += 1
@@ -130,7 +136,7 @@ def checkout(request):
         ).first()
 
         if customer is None:
-            messages.error(request, 'Customer profile not found.')
+            messages.error(request, 'پروفایل مشتری یافت نشد.')
             return redirect('cart')
 
         cart_items = list(
@@ -141,7 +147,7 @@ def checkout(request):
         )
 
         if not cart_items:
-            messages.error(request, 'Your cart is empty.')
+            messages.error(request, 'سبد خرید شما خالی است.')
             return redirect('cart')
 
         product_ids = sorted({
@@ -161,7 +167,7 @@ def checkout(request):
             if item.quantity > product.stock:
                 messages.error(
                     request,
-                    f'Not enough stock for {product.name}.'
+                    f'موجودی «{product.name}» کافی نیست.'
                 )
                 return redirect('cart')
 
@@ -176,7 +182,7 @@ def checkout(request):
         if customer.balance < total:
             messages.error(
                 request,
-                'Insufficient balance. Please increase your balance.'
+                'موجودی کیف پول کافی نیست. لطفاً کیف پول خود را افزایش دهید.'
             )
             return redirect('payment')
 
@@ -238,7 +244,7 @@ def checkout(request):
             id__in=[item.id for item in cart_items]
         ).delete()
 
-        messages.success(request, 'Order placed successfully!')
+        messages.success(request, 'سفارش با موفقیت ثبت شد!')
 
     return redirect('checkout_success', order_id=order.pk)
 
@@ -248,7 +254,10 @@ def checkout_success(request, order_id):
     customer = getattr(request.user, 'customerprofile', None)
 
     if customer is None:
-        messages.error(request, 'Only customer accounts have orders.')
+        messages.error(
+            request,
+            'این صفحه فقط برای حساب‌های مشتری است.'
+        )
         return redirect('home')
 
     order = get_object_or_404(
@@ -269,7 +278,10 @@ def order_history(request):
     customer = getattr(request.user, 'customerprofile', None)
 
     if customer is None:
-        messages.error(request, 'Only customer accounts have order history.')
+        messages.error(
+            request,
+            'تاریخچهٔ سفارش‌ها فقط برای حساب‌های مشتری است.'
+        )
         return redirect('home')
 
     orders = Order.objects.filter(

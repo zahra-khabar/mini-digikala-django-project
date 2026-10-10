@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Create Store | DijiKala{% endblock %}
+{% block title %}ایجاد فروشگاه | دیجی‌کالا{% endblock %}
 {% block content %}
-<h2>🏪 Create New Store</h2>
+<h2>🏪 ایجاد فروشگاه جدید</h2>
 <form method="post" class="auth-form">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn">Create Store</button>
+    <button type="submit" class="btn">ایجاد فروشگاه</button>
 </form>
 {% endblock %}

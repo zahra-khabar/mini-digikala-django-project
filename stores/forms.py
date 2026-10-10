@@ -12,6 +12,10 @@ class StoreForm(forms.ModelForm):
     class Meta:
         model = Store
         fields = ['name', 'description']
+        labels = {
+            'name': 'نام فروشگاه',
+            'description': 'توضیحات',
+        }
         widgets = {
             'name': forms.TextInput(
                 attrs={'class': 'form-control'}
@@ -33,6 +37,14 @@ class ProductForm(forms.ModelForm):
             'category',
             'image',
         ]
+        labels = {
+            'name': 'نام محصول',
+            'price': 'قیمت (تومان)',
+            'stock': 'موجودی',
+            'description': 'توضیحات',
+            'category': 'دسته‌بندی',
+            'image': 'تصویر',
+        }
         widgets = {
             'name': forms.TextInput(
                 attrs={'class': 'form-control'}
@@ -56,7 +68,7 @@ class ProductForm(forms.ModelForm):
 
         if image.size > MAX_IMAGE_SIZE:
             raise forms.ValidationError(
-                'Image must be smaller than 5 MB.'
+                'حجم تصویر نباید بیشتر از ۵ مگابایت باشد.'
             )
 
         try:
@@ -67,12 +79,12 @@ class ProductForm(forms.ModelForm):
                 detected_format = probe.format
         except Exception as error:
             raise forms.ValidationError(
-                'Uploaded file is not a valid image.'
+                'فایل ارسالی یک تصویر معتبر نیست.'
             ) from error
 
         if detected_format not in ALLOWED_IMAGE_FORMATS:
             raise forms.ValidationError(
-                'Only PNG, JPEG, and WebP images are allowed.'
+                'فقط تصاویر PNG، JPEG و WebP پذیرفته می‌شوند.'
             )
 
         image.seek(0)
@@ -81,14 +93,16 @@ class ProductForm(forms.ModelForm):
 
 class ProductSearchForm(forms.Form):
     q = forms.CharField(
+        label='جست‌وجو',
         max_length=100,
         required=False,
         widget=forms.TextInput(
-            attrs={'placeholder': 'Search products...'}
+            attrs={'placeholder': 'جست‌وجوی محصول...'}
         )
     )
     category = forms.ModelChoiceField(
+        label='دسته‌بندی',
         queryset=Category.objects.all(),
         required=False,
-        empty_label='All categories'
+        empty_label='همهٔ دسته‌بندی‌ها'
     )
