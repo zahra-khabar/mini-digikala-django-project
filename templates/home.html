@@ -1,15 +1,15 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Home | DijiKala{% endblock %}
+{% block title %}صفحهٔ اصلی | دیجی‌کالا{% endblock %}
 
 {% block content %}
-<h2>🛒 Latest Products</h2>
+<h2>🛒 جدیدترین محصولات</h2>
 
 <form method="get" action="{% url 'home' %}" class="search-form">
     {{ search_form.q }}
     {{ search_form.category }}
-    <button type="submit" class="btn">Search</button>
+    <button type="submit" class="btn">جست‌وجو</button>
 </form>
 
 <div class="card-grid">
@@ -18,7 +18,7 @@
             {% if product.has_image %}
                 <img src="{{ product.image.url }}" alt="{{ product.name }}">
             {% else %}
-                <div class="product-image-placeholder">No image available</div>
+                <div class="product-image-placeholder">بدون تصویر</div>
             {% endif %}
 
             <h3>{{ product.name }}</h3>
@@ -31,29 +31,29 @@
                 <p class="product-category">🏷️ {{ product.category.name }}</p>
             {% endif %}
             <p>{{ product.description|truncatewords:12 }}</p>
-            <p><strong>${{ product.price }}</strong></p>
+            <p><strong>{{ product.price }} تومان</strong></p>
 
             {% if product.stock > 0 %}
-                <p class="stock-info">In stock: {{ product.stock }}</p>
+                <p class="stock-info">موجودی: {{ product.stock }} عدد</p>
                 {% if user.is_authenticated %}
                     <form method="post"
                           action="{% url 'add_to_cart' product.id %}">
                         {% csrf_token %}
                         <button type="submit" class="btn">
-                            Add to Cart
+                            افزودن به سبد خرید
                         </button>
                     </form>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn">
-                        Login to Buy
+                        برای خرید وارد شوید
                     </a>
                 {% endif %}
             {% else %}
-                <p class="out-of-stock">Out of stock</p>
+                <p class="out-of-stock">ناموجود</p>
             {% endif %}
         </div>
     {% empty %}
-        <p>No products found.</p>
+        <p>محصولی یافت نشد.</p>
     {% endfor %}
 </div>
 {% endblock %}

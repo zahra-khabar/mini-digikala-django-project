@@ -1,10 +1,10 @@
 {% extends 'base.html' %}
-{% block title %}Add Product | DijiKala{% endblock %}
+{% block title %}افزودن محصول | دیجی‌کالا{% endblock %}
 {% block content %}
-<h2>➕ Add Product to {{ store.name }}</h2>
+<h2>➕ افزودن محصول به {{ store.name }}</h2>
 <form method="post" enctype="multipart/form-data" class="auth-form">
     {% csrf_token %}
     {{ form.as_p }}
-    <button type="submit" class="btn">Add Product</button>
+    <button type="submit" class="btn">افزودن محصول</button>
 </form>
 {% endblock %}

@@ -1,19 +1,19 @@
 {% extends 'base.html' %}
 
-{% block title %}Cart | DijiKala{% endblock %}
+{% block title %}سبد خرید | دیجی‌کالا{% endblock %}
 
 {% block content %}
-<h2>🛒 Your Cart</h2>
+<h2>🛒 سبد خرید شما</h2>
 
 {% if cart_items %}
     <table class="cart-table">
         <thead>
             <tr>
-                <th>Product</th>
-                <th>Store</th>
-                <th>Price</th>
-                <th>Quantity</th>
-                <th>Remove</th>
+                <th>محصول</th>
+                <th>فروشگاه</th>
+                <th>قیمت</th>
+                <th>تعداد</th>
+                <th>حذف</th>
             </tr>
         </thead>
         <tbody>
@@ -21,7 +21,7 @@
                 <tr>
                     <td>{{ item.product.name }}</td>
                     <td>{{ item.product.store.name }}</td>
-                    <td>${{ item.product.price }}</td>
+                    <td>{{ item.product.price }} تومان</td>
                     <td>
                         <form method="post"
                               action="{% url 'update_cart_item' item.id %}"
@@ -46,13 +46,13 @@
         </tbody>
     </table>
 
-    <p><strong>Total:</strong> ${{ total }}</p>
+    <p><strong>جمع کل:</strong> {{ total }} تومان</p>
 
     <form method="post" action="{% url 'checkout' %}">
         {% csrf_token %}
-        <button type="submit" class="btn">✅ Checkout</button>
+        <button type="submit" class="btn">✅ نهایی کردن خرید</button>
     </form>
 {% else %}
-    <p>Your cart is empty.</p>
+    <p>سبد خرید شما خالی است.</p>
 {% endif %}
 {% endblock %}
