@@ -7,7 +7,6 @@ from django.shortcuts import render, redirect
 
 from .forms import SignupForm
 from .models import CustomerProfile, SellerProfile
-from stores.models import Store
 
 
 def signup_view(request):
@@ -78,22 +77,6 @@ def customer_panel(request):
         {'customer': customer}
     )
 
-
-
-@login_required
-def seller_panel(request):
-    is_seller = SellerProfile.objects.filter(user=request.user).exists()
-
-    if not is_seller:
-        if CustomerProfile.objects.filter(user=request.user).exists():
-            return redirect('customer_panel')
-        return redirect('home')
-
-    stores = Store.objects.filter(owner=request.user)
-
-    return render(request, 'seller_panel.html', {
-        'stores': stores
-    })
 
 
 @login_required

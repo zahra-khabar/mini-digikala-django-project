@@ -16,14 +16,17 @@
                 <a href="/" class="logo">🛍️ DijiKala</a>
             </div>
             <div class="nav-right">
+                <a href="{% url 'stores_list' %}">🏪 All Stores</a>
                 {% if user.is_authenticated %}
-                    <a href="{% url 'customer_panel' %}">👤 {{ user.username }}</a>
+                    {% if user.sellerprofile %}
+                        <a href="{% url 'create_store' %}">+ Create Store</a>
+                    {% endif %}
                     <a href="{% url 'cart' %}">🛒 Cart</a>
+                    <a href="{% url 'customer_panel' %}">👤 {{ user.username }}</a>
                     <a href="{% url 'logout' %}">Logout</a>
                 {% else %}
                     <a href="{% url 'login' %}">Login</a>
                     <a href="{% url 'signup' %}">Sign Up</a>
-                
                 {% endif %}
             </div>
         </div>
@@ -31,8 +34,18 @@
 
     <!-- Page content -->
     <main class="container">
-        {% block content %}
-        {% endblock %}
+        <div class="page-content">
+            {% if messages %}
+                <div class="messages">
+                    {% for message in messages %}
+                        <div class="message {{ message.tags }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+
+            {% block content %}
+            {% endblock %}
+        </div>
     </main>
 
     <footer class="footer">
