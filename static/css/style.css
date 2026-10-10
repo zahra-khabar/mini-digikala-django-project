@@ -404,6 +404,11 @@ hr {
     font-size: 0.85rem;
 }
 
+.store-balance {
+    color: #1b5e20;
+    font-size: 0.85rem;
+}
+
 .out-of-stock {
     color: #b3261e;
     font-weight: 600;

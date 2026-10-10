@@ -63,6 +63,33 @@ def create_store(request):
 
 
 @login_required
+def edit_store(request, store_id):
+    store = get_object_or_404(Store, pk=store_id)
+    seller = getattr(request.user, 'sellerprofile', None)
+
+    if seller is None or store.owner_id != seller.pk:
+        return HttpResponseForbidden(
+            'فقط می‌توانید فروشگاه‌های خودتان را ویرایش کنید.'
+        )
+
+    if request.method == 'POST':
+        form = StoreForm(request.POST, instance=store)
+
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'فروشگاه به‌روزرسانی شد.')
+            return redirect('store_detail', store_id=store.pk)
+    else:
+        form = StoreForm(instance=store)
+
+    return render(
+        request,
+        'stores/edit_store.html',
+        {'form': form, 'store': store}
+    )
+
+
+@login_required
 def add_product(request, store_id):
     store = get_object_or_404(Store, pk=store_id)
     seller = getattr(request.user, 'sellerprofile', None)

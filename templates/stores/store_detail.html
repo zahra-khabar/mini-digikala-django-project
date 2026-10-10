@@ -6,6 +6,7 @@
     <p>{{ store.description }}</p>
     {% if is_owner %}
         <a href="{% url 'add_product' store.id %}" class="btn">+ افزودن محصول</a>
+        <a href="{% url 'edit_store' store.id %}" class="btn btn-secondary">✏️ ویرایش فروشگاه</a>
     {% endif %}
 </div>
 <hr>

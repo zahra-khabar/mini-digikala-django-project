@@ -1,6 +1,7 @@
 from decimal import Decimal
 
 from django.contrib.auth.models import User
+from django.core.management import call_command
 from django.test import TestCase
 from django.urls import reverse
 
@@ -204,3 +205,53 @@ class StoreManagementTests(TestCase):
 
         self.assertContains(response, 'بدون تصویر')
         self.assertNotContains(response, 'products/missing.webp')
+
+    def test_owner_can_edit_store(self):
+        self.login('owner', 'OwnerPass123')
+
+        response = self.client.post(
+            reverse('edit_store', args=[self.store.pk]),
+            {'name': 'Renamed Store', 'description': 'Updated'}
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('store_detail', args=[self.store.pk])
+        )
+
+        self.store.refresh_from_db()
+        self.assertEqual(self.store.name, 'Renamed Store')
+        self.assertEqual(self.store.description, 'Updated')
+
+    def test_other_seller_cannot_edit_store(self):
+        self.login('other_seller', 'OtherPass123')
+
+        response = self.client.post(
+            reverse('edit_store', args=[self.store.pk]),
+            {'name': 'Hacked Store', 'description': ''}
+        )
+
+        self.assertEqual(response.status_code, 403)
+
+        self.store.refresh_from_db()
+        self.assertNotEqual(self.store.name, 'Hacked Store')
+
+    def test_seed_demo_is_repeatable(self):
+        call_command('seed_demo')
+        first_users = User.objects.count()
+        first_products = Product.objects.count()
+
+        call_command('seed_demo')
+
+        self.assertEqual(User.objects.count(), first_users)
+        self.assertEqual(Product.objects.count(), first_products)
+        self.assertTrue(
+            CustomerProfile.objects.filter(
+                user__username='customer_demo'
+            ).exists()
+        )
+        self.assertTrue(
+            Product.objects.filter(
+                store__name='دیجی‌استور'
+            ).exists()
+        )
