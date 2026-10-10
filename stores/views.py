@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db.models import ProtectedError
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
@@ -129,7 +130,15 @@ def delete_product(request, store_id, product_id):
             'You can only manage products of your own stores.'
         )
 
-    product.delete()
+    try:
+        product.delete()
+    except ProtectedError:
+        messages.error(
+            request,
+            'This product has orders and cannot be deleted.'
+        )
+        return redirect('store_detail', store_id=store.pk)
+
     messages.success(request, 'Product deleted.')
 
     return redirect('store_detail', store_id=store.pk)

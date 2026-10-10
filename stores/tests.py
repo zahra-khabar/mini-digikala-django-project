@@ -5,6 +5,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import CustomerProfile, SellerProfile
+from orders.models import Order, OrderItem
 from .models import Category, Product, Store
 
 
@@ -121,6 +122,40 @@ class StoreManagementTests(TestCase):
             reverse('store_detail', args=[self.store.pk])
         )
         self.assertFalse(
+            Product.objects.filter(pk=product.pk).exists()
+        )
+
+    def test_product_with_orders_cannot_be_deleted(self):
+        product = Product.objects.create(
+            name='Ordered Item',
+            price=Decimal('5.00'),
+            stock=1,
+            store=self.store
+        )
+        order = Order.objects.create(
+            customer=self.visitor,
+            total_amount=Decimal('5.00')
+        )
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            quantity=1,
+            price=Decimal('5.00')
+        )
+
+        self.login('owner', 'OwnerPass123')
+        response = self.client.post(
+            reverse(
+                'delete_product',
+                args=[self.store.pk, product.pk]
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('store_detail', args=[self.store.pk])
+        )
+        self.assertTrue(
             Product.objects.filter(pk=product.pk).exists()
         )
 

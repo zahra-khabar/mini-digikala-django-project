@@ -22,6 +22,10 @@ def add_to_cart(request, product_id):
 
     product = get_object_or_404(Product, pk=product_id)
 
+    if product.stock < 1:
+        messages.error(request, 'This product is out of stock.')
+        return redirect('cart')
+
     item, created = CartItem.objects.get_or_create(
         customer=customer,
         product=product,
@@ -29,8 +33,17 @@ def add_to_cart(request, product_id):
     )
 
     if not created:
+        if item.quantity + 1 > product.stock:
+            messages.error(
+                request,
+                'Not enough stock for this product.'
+            )
+            return redirect('cart')
+
         item.quantity += 1
         item.save(update_fields=['quantity'])
+
+    messages.success(request, 'Product added to your cart.')
 
     return redirect('cart')
 
@@ -93,8 +106,14 @@ def update_cart_item(request, item_id):
     action = request.POST.get('action')
 
     if action == 'increase':
-        item.quantity += 1
-        item.save(update_fields=['quantity'])
+        if item.quantity >= item.product.stock:
+            messages.error(
+                request,
+                'Not enough stock for this product.'
+            )
+        else:
+            item.quantity += 1
+            item.save(update_fields=['quantity'])
     elif action == 'decrease' and item.quantity > 1:
         item.quantity -= 1
         item.save(update_fields=['quantity'])
@@ -125,8 +144,32 @@ def checkout(request):
             messages.error(request, 'Your cart is empty.')
             return redirect('cart')
 
+        product_ids = sorted({
+            item.product_id for item in cart_items
+        })
+
+        products = {
+            product.pk: product
+            for product in Product.objects.select_for_update()
+            .filter(pk__in=product_ids)
+            .order_by('pk')
+        }
+
+        for item in cart_items:
+            product = products[item.product_id]
+
+            if item.quantity > product.stock:
+                messages.error(
+                    request,
+                    f'Not enough stock for {product.name}.'
+                )
+                return redirect('cart')
+
         total = sum(
-            (item.product.price * item.quantity for item in cart_items),
+            (
+                products[item.product_id].price * item.quantity
+                for item in cart_items
+            ),
             Decimal('0.00')
         )
 
@@ -138,7 +181,7 @@ def checkout(request):
             return redirect('payment')
 
         store_ids = sorted({
-            item.product.store_id for item in cart_items
+            product.store_id for product in products.values()
         })
 
         stores = {
@@ -154,26 +197,33 @@ def checkout(request):
         )
 
         order_items = []
+        stock_updates = []
         store_totals = {
             store_id: Decimal('0.00')
             for store_id in store_ids
         }
 
         for item in cart_items:
+            product = products[item.product_id]
+
             order_items.append(
                 OrderItem(
                     order=order,
-                    product=item.product,
+                    product=product,
                     quantity=item.quantity,
-                    price=item.product.price
+                    price=product.price
                 )
             )
 
-            store_totals[item.product.store_id] += (
-                item.product.price * item.quantity
+            store_totals[product.store_id] += (
+                product.price * item.quantity
             )
 
+            product.stock -= item.quantity
+            stock_updates.append(product)
+
         OrderItem.objects.bulk_create(order_items)
+        Product.objects.bulk_update(stock_updates, ['stock'])
 
         customer.balance -= total
         customer.save(update_fields=['balance'])
