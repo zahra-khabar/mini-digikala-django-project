@@ -26,7 +26,7 @@ from stores.models import Product
 def home(request):
     products = Product.objects.select_related(
         'store'
-    ).order_by('-created_at')[:8]
+    ).order_by('-created_at')
 
     return render(
         request,
@@ -37,8 +37,8 @@ def home(request):
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('accounts.urls')),
-    path('orders/', include('orders.urls')),
+    path('', include('accounts.urls')),
+    path('', include('orders.urls')),
     path('', home, name='home'),
 ]
 if settings.DEBUG:
