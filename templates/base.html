@@ -1,10 +1,10 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}DijiKala{% endblock %}</title>
+    <title>{% block title %}دیجی‌کالا{% endblock %}</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
 </head>
 <body>
@@ -13,20 +13,20 @@
     <nav class="navbar">
         <div class="container">
             <div class="nav-left">
-                <a href="/" class="logo">🛍️ DijiKala</a>
+                <a href="/" class="logo">🛍️ دیجی‌کالا</a>
             </div>
             <div class="nav-right">
-                <a href="{% url 'stores_list' %}">🏪 All Stores</a>
+                <a href="{% url 'stores_list' %}">🏪 فروشگاه‌ها</a>
                 {% if user.is_authenticated %}
                     {% if user.sellerprofile %}
-                        <a href="{% url 'create_store' %}">+ Create Store</a>
+                        <a href="{% url 'create_store' %}">+ ایجاد فروشگاه</a>
                     {% endif %}
-                    <a href="{% url 'cart' %}">🛒 Cart</a>
+                    <a href="{% url 'cart' %}">🛒 سبد خرید</a>
                     <a href="{% url 'customer_panel' %}">👤 {{ user.username }}</a>
-                    <a href="{% url 'logout' %}">Logout</a>
+                    <a href="{% url 'logout' %}">خروج</a>
                 {% else %}
-                    <a href="{% url 'login' %}">Login</a>
-                    <a href="{% url 'signup' %}">Sign Up</a>
+                    <a href="{% url 'login' %}">ورود</a>
+                    <a href="{% url 'signup' %}">ثبت‌نام</a>
                 {% endif %}
             </div>
         </div>
@@ -49,7 +49,7 @@
     </main>
 
     <footer class="footer">
-        <p>© 2025 DijiKala – Made with ❤️ for Django students.</p>
+        <p>© ۲۰۲۶ دیجی‌کالا — پروژهٔ آموزشی جنگو</p>
     </footer>
 
     {% block scripts %}

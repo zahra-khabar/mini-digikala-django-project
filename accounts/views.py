@@ -98,7 +98,7 @@ def payment_view(request):
         if amount.is_finite() and amount > 0:
             customer.balance += amount
             customer.save(update_fields=['balance'])
-            messages.success(request, 'Balance updated successfully.')
+            messages.success(request, 'موجودی کیف پول با موفقیت افزایش یافت.')
             return redirect('customer_panel')
 
     return render(

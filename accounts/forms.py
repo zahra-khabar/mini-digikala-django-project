@@ -6,15 +6,22 @@ from .models import CustomerProfile, SellerProfile
 
 
 class SignupForm(forms.Form):
-    username = forms.CharField(max_length=150)
-    email = forms.EmailField()
-    password1 = forms.CharField(widget=forms.PasswordInput)
-    password2 = forms.CharField(widget=forms.PasswordInput)
-    phone = forms.CharField(max_length=20)
+    username = forms.CharField(label='نام کاربری', max_length=150)
+    email = forms.EmailField(label='ایمیل')
+    password1 = forms.CharField(
+        label='رمز عبور',
+        widget=forms.PasswordInput
+    )
+    password2 = forms.CharField(
+        label='تکرار رمز عبور',
+        widget=forms.PasswordInput
+    )
+    phone = forms.CharField(label='شماره تلفن', max_length=20)
     role = forms.ChoiceField(
+        label='نقش',
         choices=[
-            ('customer', 'Customer'),
-            ('seller', 'Seller'),
+            ('customer', 'مشتری'),
+            ('seller', 'فروشنده'),
         ]
     )
 
@@ -23,7 +30,7 @@ class SignupForm(forms.Form):
 
         if User.objects.filter(username=username).exists():
             raise forms.ValidationError(
-                'This username already exists.'
+                'این نام کاربری قبلاً ثبت شده است.'
             )
 
         return username
@@ -46,7 +53,7 @@ class SignupForm(forms.Form):
 
         if password1 and password2 and password1 != password2:
             raise forms.ValidationError(
-                'Passwords do not match.'
+                'رمزهای عبور یکسان نیستند.'
             )
 
         return cleaned_data

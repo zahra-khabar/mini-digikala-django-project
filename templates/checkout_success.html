@@ -1,26 +1,26 @@
 {% extends 'base.html' %}
 
-{% block title %}Order Placed | DijiKala{% endblock %}
+{% block title %}سفارش ثبت شد | دیجی‌کالا{% endblock %}
 
 {% block content %}
 <div class="card" style="max-width: 520px;">
-    <h2>🎉 Thank you for your order!</h2>
-    <p>Your demo payment went through and your order is confirmed.</p>
+    <h2>🎉 از خرید شما سپاسگزاریم!</h2>
+    <p>پرداخت آزمایشی شما با موفقیت انجام شد و سفارش ثبت گردید.</p>
 
-    <h3>Order #{{ order.id }}</h3>
+    <h3>خلاصهٔ سفارش #{{ order.id }}</h3>
     <ul>
         {% for item in order.orderitem_set.all %}
             <li>
                 {{ item.product.name }} × {{ item.quantity }}
-                — ${{ item.price|floatformat:2 }}
+                — {{ item.price|floatformat:2 }} تومان
             </li>
         {% endfor %}
     </ul>
-    <p><strong>Total:</strong> ${{ order.total_amount|floatformat:2 }}</p>
+    <p><strong>جمع کل:</strong> {{ order.total_amount|floatformat:2 }} تومان</p>
 
     <div style="margin-top: 10px;">
-        <a href="{% url 'order_history' %}" class="btn">📜 Order History</a>
-        <a href="{% url 'home' %}" class="btn btn-secondary">Continue Shopping</a>
+        <a href="{% url 'order_history' %}" class="btn">📜 تاریخچهٔ سفارش‌ها</a>
+        <a href="{% url 'home' %}" class="btn btn-secondary">ادامهٔ خرید</a>
     </div>
 </div>
 {% endblock %}

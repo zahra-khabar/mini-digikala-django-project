@@ -1,17 +1,17 @@
 {% extends 'base.html' %}
-{% block title %}Seller Panel | DijiKala{% endblock %}
+{% block title %}پنل فروشنده | دیجی‌کالا{% endblock %}
 {% block content %}
-<h2>👨‍💼 Seller Panel</h2>
-<a href="{% url 'create_store' %}" class="btn">+ Create New Store</a>
+<h2>👨‍💼 پنل فروشنده</h2>
+<a href="{% url 'create_store' %}" class="btn">+ ایجاد فروشگاه جدید</a>
 <div class="card-grid" style="margin-top: 20px;">
     {% for store in stores %}
         <div class="card">
             <h3>{{ store.name }}</h3>
             <p>{{ store.description|truncatewords:15 }}</p>
-            <a href="{% url 'store_detail' store.id %}" class="btn">Manage Store</a>
+            <a href="{% url 'store_detail' store.id %}" class="btn">مدیریت فروشگاه</a>
         </div>
     {% empty %}
-        <p>You have no stores yet.</p>
+        <p>هنوز فروشگاهی نساخته‌اید.</p>
     {% endfor %}
 </div>
 {% endblock %}

@@ -1,11 +1,11 @@
 {% extends 'base.html' %}
-{% block title %}{{ store.name }} | DijiKala{% endblock %}
+{% block title %}{{ store.name }} | دیجی‌کالا{% endblock %}
 {% block content %}
 <div class="store-header">
     <h2>{{ store.name }}</h2>
     <p>{{ store.description }}</p>
     {% if is_owner %}
-        <a href="{% url 'add_product' store.id %}" class="btn">+ Add Product</a>
+        <a href="{% url 'add_product' store.id %}" class="btn">+ افزودن محصول</a>
     {% endif %}
 </div>
 <hr>
@@ -15,42 +15,42 @@
             {% if product.has_image %}
                 <img src="{{ product.image.url }}" alt="{{ product.name }}">
             {% else %}
-                <div class="product-image-placeholder">No image available</div>
+                <div class="product-image-placeholder">بدون تصویر</div>
             {% endif %}
             <h3>{{ product.name }}</h3>
             {% if product.category %}
                 <p class="product-category">🏷️ {{ product.category.name }}</p>
             {% endif %}
             <p>{{ product.description|truncatewords:12 }}</p>
-            <p><strong>${{ product.price }}</strong></p>
+            <p><strong>{{ product.price }} تومان</strong></p>
             {% if is_owner %}
-                <p class="stock-info">In stock: {{ product.stock }}</p>
+                <p class="stock-info">موجودی: {{ product.stock }} عدد</p>
                 <div class="product-actions">
-                    <a href="{% url 'edit_product' store.id product.id %}" class="btn btn-secondary">Edit</a>
+                    <a href="{% url 'edit_product' store.id product.id %}" class="btn btn-secondary">ویرایش</a>
                     <form method="post"
                           action="{% url 'delete_product' store.id product.id %}"
-                          onsubmit="return confirm('Delete this product?');">
+                          onsubmit="return confirm('این محصول حذف شود؟');">
                         {% csrf_token %}
-                        <button type="submit" class="btn btn-danger">Delete</button>
+                        <button type="submit" class="btn btn-danger">حذف</button>
                     </form>
                 </div>
             {% elif product.stock > 0 %}
-                <p class="stock-info">In stock: {{ product.stock }}</p>
+                <p class="stock-info">موجودی: {{ product.stock }} عدد</p>
                 {% if user.is_authenticated %}
                     <form method="post"
                           action="{% url 'add_to_cart' product.id %}">
                         {% csrf_token %}
-                        <button type="submit" class="btn">Add to Cart</button>
+                        <button type="submit" class="btn">افزودن به سبد خرید</button>
                     </form>
                 {% else %}
-                    <p><a href="{% url 'login' %}">Login to Buy</a></p>
+                    <p><a href="{% url 'login' %}">برای خرید وارد شوید</a></p>
                 {% endif %}
             {% else %}
-                <p class="out-of-stock">Out of stock</p>
+                <p class="out-of-stock">ناموجود</p>
             {% endif %}
         </div>
     {% empty %}
-        <p>No products in this store yet.</p>
+        <p>هنوز محصولی در این فروشگاه ثبت نشده است.</p>
     {% endfor %}
 </div>
 {% endblock %}

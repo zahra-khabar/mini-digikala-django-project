@@ -1,43 +1,42 @@
-
 {% extends 'base.html' %}
 
-{% block title %}Order History | DijiKala{% endblock %}
+{% block title %}تاریخچهٔ سفارش‌ها | دیجی‌کالا{% endblock %}
 
 {% block content %}
-<h2>📜 Order History</h2>
+<h2>📜 تاریخچهٔ سفارش‌ها</h2>
 
 {% if orders %}
     <div class="card-grid">
         {% for order in orders %}
             <div class="card">
-                <h3>Order #{{ order.id }}</h3>
+                <h3>سفارش #{{ order.id }}</h3>
                 <p>
-                    <strong>Date:</strong>
+                    <strong>تاریخ:</strong>
                     {{ order.created_at|date:"Y-m-d H:i" }}
                 </p>
                 <p>
-                    <strong>Total:</strong>
-                    ${{ order.total_amount|floatformat:2 }}
+                    <strong>جمع کل:</strong>
+                    {{ order.total_amount|floatformat:2 }} تومان
                 </p>
 
                 <hr>
-                <h4>Order Items</h4>
+                <h4>اقلام سفارش</h4>
 
                 <ul>
                     {% for item in order.orderitem_set.all %}
                         <li>
                             <strong>{{ item.product.name }}</strong>
-                            — Quantity: {{ item.quantity }}
-                            — Unit price: ${{ item.price|floatformat:2 }}
+                            — تعداد: {{ item.quantity }}
+                            — قیمت واحد: {{ item.price|floatformat:2 }} تومان
                         </li>
                     {% empty %}
-                        <li>No items found for this order.</li>
+                        <li>قلمی برای این سفارش ثبت نشده است.</li>
                     {% endfor %}
                 </ul>
             </div>
         {% endfor %}
     </div>
 {% else %}
-    <p>You haven't placed any orders yet.</p>
+    <p>هنوز سفارشی ثبت نکرده‌اید.</p>
 {% endif %}
 {% endblock %}

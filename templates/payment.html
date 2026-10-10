@@ -1,13 +1,13 @@
 {% extends 'base.html' %}
-{% block title %}Payment | DijiKala{% endblock %}
+{% block title %}افزایش موجودی | دیجی‌کالا{% endblock %}
 
 {% block content %}
-<h2>💳 Add Balance</h2>
+<h2>💳 افزایش موجودی</h2>
 
 <form action="{% url 'payment' %}" method="post" class="payment-form">
     {% csrf_token %}
-    <label for="amount">Enter amount:</label>
+    <label for="amount">مبلغ را وارد کنید:</label>
     <input type="number" name="amount" id="amount" min="1" required>
-    <button type="submit" class="btn">Add Balance</button>
+    <button type="submit" class="btn">افزودن موجودی</button>
 </form>
 {% endblock %}
