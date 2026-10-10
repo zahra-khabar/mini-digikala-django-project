@@ -240,7 +240,28 @@ def checkout(request):
 
         messages.success(request, 'Order placed successfully!')
 
-    return redirect('order_history')
+    return redirect('checkout_success', order_id=order.pk)
+
+
+@login_required
+def checkout_success(request, order_id):
+    customer = getattr(request.user, 'customerprofile', None)
+
+    if customer is None:
+        messages.error(request, 'Only customer accounts have orders.')
+        return redirect('home')
+
+    order = get_object_or_404(
+        Order.objects.prefetch_related('orderitem_set__product'),
+        pk=order_id,
+        customer=customer
+    )
+
+    return render(
+        request,
+        'checkout_success.html',
+        {'order': order}
+    )
 
 
 @login_required

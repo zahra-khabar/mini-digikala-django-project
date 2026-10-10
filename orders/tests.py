@@ -57,7 +57,11 @@ class MarketplaceFlowTests(TestCase):
 
         response = self.client.post(reverse('checkout'))
 
-        self.assertRedirects(response, reverse('order_history'))
+        order = Order.objects.get()
+        self.assertRedirects(
+            response,
+            reverse('checkout_success', args=[order.pk])
+        )
 
         self.customer.refresh_from_db()
         self.store.refresh_from_db()
@@ -68,7 +72,6 @@ class MarketplaceFlowTests(TestCase):
         self.assertEqual(Order.objects.count(), 1)
         self.assertEqual(CartItem.objects.count(), 0)
 
-        order = Order.objects.get()
         self.assertEqual(order.customer, self.customer)
         self.assertEqual(order.total_amount, Decimal('10.00'))
 
@@ -169,3 +172,25 @@ class MarketplaceFlowTests(TestCase):
 
         self.assertRedirects(response, reverse('home'))
         self.assertEqual(CartItem.objects.count(), 0)
+
+    def test_thank_you_page_is_private(self):
+        order = Order.objects.create(
+            customer=self.customer,
+            total_amount=Decimal('10.00')
+        )
+
+        other_user = User.objects.create_user(
+            username='customer2',
+            password='OtherPass123'
+        )
+        CustomerProfile.objects.create(
+            user=other_user,
+            phone='09120000001'
+        )
+
+        self.client.login(username='customer2', password='OtherPass123')
+        response = self.client.get(
+            reverse('checkout_success', args=[order.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)
