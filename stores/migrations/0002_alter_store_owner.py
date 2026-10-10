@@ -49,13 +49,13 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
+        migrations.RunPython(
+            remap_owners_to_seller_profiles,
+            remap_owners_back_to_users,
+        ),
         migrations.AlterField(
             model_name='store',
             name='owner',
             field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='stores', to='accounts.sellerprofile'),
-        ),
-        migrations.RunPython(
-            remap_owners_to_seller_profiles,
-            remap_owners_back_to_users,
         ),
     ]

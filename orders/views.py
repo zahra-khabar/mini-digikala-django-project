@@ -14,10 +14,16 @@ from .models import CartItem, Order, OrderItem
 @login_required
 @require_POST
 def add_to_cart(request, product_id):
+    customer = getattr(request.user, 'customerprofile', None)
+
+    if customer is None:
+        messages.error(request, 'Only customer accounts can buy products.')
+        return redirect('home')
+
     product = get_object_or_404(Product, pk=product_id)
 
     item, created = CartItem.objects.get_or_create(
-        customer=request.user,
+        customer=customer,
         product=product,
         defaults={'quantity': 1}
     )
@@ -31,8 +37,14 @@ def add_to_cart(request, product_id):
 
 @login_required
 def cart_view(request):
+    customer = getattr(request.user, 'customerprofile', None)
+
+    if customer is None:
+        messages.error(request, 'Only customer accounts have a cart.')
+        return redirect('home')
+
     cart_items = CartItem.objects.filter(
-        customer=request.user
+        customer=customer
     ).select_related('product', 'product__store')
 
     total = sum(
@@ -50,10 +62,15 @@ def cart_view(request):
 @login_required
 @require_POST
 def remove_from_cart(request, item_id):
+    customer = getattr(request.user, 'customerprofile', None)
+
+    if customer is None:
+        return redirect('home')
+
     item = get_object_or_404(
         CartItem,
         pk=item_id,
-        customer=request.user
+        customer=customer
     )
     item.delete()
     return redirect('cart')
@@ -73,7 +90,7 @@ def checkout(request):
 
         cart_items = list(
             CartItem.objects.select_for_update(of=('self',))
-            .filter(customer=request.user)
+            .filter(customer=customer)
             .select_related('product', 'product__store')
             .order_by('id')
         )
@@ -106,7 +123,7 @@ def checkout(request):
         }
 
         order = Order.objects.create(
-            customer=request.user,
+            customer=customer,
             total_amount=total
         )
 
@@ -141,7 +158,7 @@ def checkout(request):
             store.save(update_fields=['balance'])
 
         CartItem.objects.filter(
-            customer=request.user,
+            customer=customer,
             id__in=[item.id for item in cart_items]
         ).delete()
 
@@ -152,8 +169,14 @@ def checkout(request):
 
 @login_required
 def order_history(request):
+    customer = getattr(request.user, 'customerprofile', None)
+
+    if customer is None:
+        messages.error(request, 'Only customer accounts have order history.')
+        return redirect('home')
+
     orders = Order.objects.filter(
-        customer=request.user
+        customer=customer
     ).order_by('-created_at')
 
     return render(

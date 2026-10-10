@@ -1,10 +1,10 @@
 from django.db import models
-from django.contrib.auth.models import User
+from accounts.models import CustomerProfile
 
 
 class CartItem(models.Model):
     customer = models.ForeignKey(
-        User,
+        CustomerProfile,
         on_delete=models.CASCADE
     )
     product = models.ForeignKey(
@@ -16,7 +16,7 @@ class CartItem(models.Model):
 
 class Order(models.Model):
     customer = models.ForeignKey(
-        User,
+        CustomerProfile,
         on_delete=models.CASCADE
     )
     total_amount = models.DecimalField(
