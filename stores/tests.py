@@ -62,6 +62,7 @@ class StoreManagementTests(TestCase):
             {
                 'name': 'New Product',
                 'price': '25.00',
+                'stock': '3',
                 'description': 'A product'
             }
         )

@@ -2,6 +2,16 @@ from django.db import models
 from accounts.models import SellerProfile
 
 
+class Category(models.Model):
+    name = models.CharField(max_length=100, unique=True)
+
+    class Meta:
+        verbose_name_plural = 'categories'
+
+    def __str__(self):
+        return self.name
+
+
 class Store(models.Model):
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(
@@ -27,11 +37,19 @@ class Product(models.Model):
         max_digits=12,
         decimal_places=2
     )
+    stock = models.PositiveIntegerField(default=0)
     description = models.TextField(blank=True)
     image = models.ImageField(
         upload_to='products/',
         blank=True,
         null=True
+    )
+    category = models.ForeignKey(
+        Category,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='products'
     )
     store = models.ForeignKey(
         Store,
@@ -39,6 +57,9 @@ class Product(models.Model):
         related_name='products'
     )
     created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
 
     def __str__(self):
         return self.name
