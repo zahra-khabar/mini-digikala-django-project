@@ -18,9 +18,13 @@
                 <div class="product-image-placeholder">No image available</div>
             {% endif %}
             <h3>{{ product.name }}</h3>
+            {% if product.category %}
+                <p class="product-category">🏷️ {{ product.category.name }}</p>
+            {% endif %}
             <p>{{ product.description|truncatewords:12 }}</p>
             <p><strong>${{ product.price }}</strong></p>
             {% if is_owner %}
+                <p class="stock-info">In stock: {{ product.stock }}</p>
                 <div class="product-actions">
                     <a href="{% url 'edit_product' store.id product.id %}" class="btn btn-secondary">Edit</a>
                     <form method="post"
@@ -30,14 +34,19 @@
                         <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
-            {% elif user.is_authenticated %}
-                <form method="post"
-                      action="{% url 'add_to_cart' product.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn">Add to Cart</button>
-                </form>
+            {% elif product.stock > 0 %}
+                <p class="stock-info">In stock: {{ product.stock }}</p>
+                {% if user.is_authenticated %}
+                    <form method="post"
+                          action="{% url 'add_to_cart' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn">Add to Cart</button>
+                    </form>
+                {% else %}
+                    <p><a href="{% url 'login' %}">Login to Buy</a></p>
+                {% endif %}
             {% else %}
-                <p><a href="{% url 'login' %}">Login to Buy</a></p>
+                <p class="out-of-stock">Out of stock</p>
             {% endif %}
         </div>
     {% empty %}
