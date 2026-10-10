@@ -106,6 +106,10 @@ def add_product(request, store_id):
             product = form.save(commit=False)
             product.store = store
             product.save()
+            messages.success(
+                request,
+                f'محصول «{product.name}» افزوده شد.'
+            )
             return redirect('store_detail', store_id=store.pk)
     else:
         form = ProductForm()
@@ -137,6 +141,10 @@ def edit_product(request, store_id, product_id):
 
         if form.is_valid():
             form.save()
+            messages.success(
+                request,
+                f'محصول «{product.name}» به‌روزرسانی شد.'
+            )
             return redirect('store_detail', store_id=store.pk)
     else:
         form = ProductForm(instance=product)
