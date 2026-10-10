@@ -5,7 +5,8 @@ from django.test import TestCase
 from django.urls import reverse
 
 from accounts.models import CustomerProfile, SellerProfile
-from .models import Product, Store
+from orders.models import Order, OrderItem
+from .models import Category, Product, Store
 
 
 class StoreManagementTests(TestCase):
@@ -62,6 +63,7 @@ class StoreManagementTests(TestCase):
             {
                 'name': 'New Product',
                 'price': '25.00',
+                'stock': '3',
                 'description': 'A product'
             }
         )
@@ -103,6 +105,7 @@ class StoreManagementTests(TestCase):
         product = Product.objects.create(
             name='Disposable',
             price=Decimal('5.00'),
+            stock=1,
             store=self.store
         )
 
@@ -121,3 +124,69 @@ class StoreManagementTests(TestCase):
         self.assertFalse(
             Product.objects.filter(pk=product.pk).exists()
         )
+
+    def test_product_with_orders_cannot_be_deleted(self):
+        product = Product.objects.create(
+            name='Ordered Item',
+            price=Decimal('5.00'),
+            stock=1,
+            store=self.store
+        )
+        order = Order.objects.create(
+            customer=self.visitor,
+            total_amount=Decimal('5.00')
+        )
+        OrderItem.objects.create(
+            order=order,
+            product=product,
+            quantity=1,
+            price=Decimal('5.00')
+        )
+
+        self.login('owner', 'OwnerPass123')
+        response = self.client.post(
+            reverse(
+                'delete_product',
+                args=[self.store.pk, product.pk]
+            )
+        )
+
+        self.assertRedirects(
+            response,
+            reverse('store_detail', args=[self.store.pk])
+        )
+        self.assertTrue(
+            Product.objects.filter(pk=product.pk).exists()
+        )
+
+    def test_home_search_and_category_filter(self):
+        electronics = Category.objects.create(name='Electronics')
+
+        Product.objects.create(
+            name='Gaming Laptop',
+            price=Decimal('100.00'),
+            stock=2,
+            store=self.store,
+            category=electronics
+        )
+        Product.objects.create(
+            name='Coffee Mug',
+            price=Decimal('5.00'),
+            stock=3,
+            store=self.store
+        )
+
+        response = self.client.get(reverse('home'))
+        self.assertContains(response, 'Gaming Laptop')
+        self.assertContains(response, 'Coffee Mug')
+
+        response = self.client.get(reverse('home'), {'q': 'laptop'})
+        self.assertContains(response, 'Gaming Laptop')
+        self.assertNotContains(response, 'Coffee Mug')
+
+        response = self.client.get(
+            reverse('home'),
+            {'category': electronics.pk}
+        )
+        self.assertContains(response, 'Gaming Laptop')
+        self.assertNotContains(response, 'Coffee Mug')

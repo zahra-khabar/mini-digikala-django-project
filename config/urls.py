@@ -20,18 +20,32 @@ from django.urls import include, path
 from django.shortcuts import render
 from django.conf import settings
 from django.conf.urls.static import static
+from stores.forms import ProductSearchForm
 from stores.models import Product
 
 
 def home(request):
+    search_form = ProductSearchForm(request.GET or None)
+
     products = Product.objects.select_related(
-        'store'
+        'store',
+        'category'
     ).order_by('-created_at')
+
+    if search_form.is_bound and search_form.is_valid():
+        query = search_form.cleaned_data['q'].strip()
+        category = search_form.cleaned_data['category']
+
+        if query:
+            products = products.filter(name__icontains=query)
+
+        if category is not None:
+            products = products.filter(category=category)
 
     return render(
         request,
         'home.html',
-        {'products': products}
+        {'products': products, 'search_form': search_form}
     )
 
 

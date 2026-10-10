@@ -25,6 +25,7 @@ class MarketplaceFlowTests(TestCase):
         cls.product = Product.objects.create(
             name='Test Product',
             price=Decimal('10.00'),
+            stock=5,
             store=cls.store
         )
 
@@ -56,16 +57,21 @@ class MarketplaceFlowTests(TestCase):
 
         response = self.client.post(reverse('checkout'))
 
-        self.assertRedirects(response, reverse('order_history'))
+        order = Order.objects.get()
+        self.assertRedirects(
+            response,
+            reverse('checkout_success', args=[order.pk])
+        )
 
         self.customer.refresh_from_db()
         self.store.refresh_from_db()
+        self.product.refresh_from_db()
         self.assertEqual(self.customer.balance, Decimal('40.00'))
         self.assertEqual(self.store.balance, Decimal('10.00'))
+        self.assertEqual(self.product.stock, 4)
         self.assertEqual(Order.objects.count(), 1)
         self.assertEqual(CartItem.objects.count(), 0)
 
-        order = Order.objects.get()
         self.assertEqual(order.customer, self.customer)
         self.assertEqual(order.total_amount, Decimal('10.00'))
 
@@ -90,6 +96,25 @@ class MarketplaceFlowTests(TestCase):
         self.store.refresh_from_db()
         self.assertEqual(self.customer.balance, Decimal('50.00'))
         self.assertEqual(self.store.balance, Decimal('0.00'))
+
+    def test_checkout_requires_enough_stock(self):
+        self.login_customer()
+        self.client.post(reverse('add_to_cart', args=[self.product.pk]))
+        self.client.post(reverse('add_to_cart', args=[self.product.pk]))
+
+        self.product.stock = 1
+        self.product.save()
+
+        response = self.client.post(reverse('checkout'))
+
+        self.assertRedirects(response, reverse('cart'))
+        self.assertEqual(Order.objects.count(), 0)
+        self.assertEqual(CartItem.objects.count(), 1)
+
+        self.customer.refresh_from_db()
+        self.product.refresh_from_db()
+        self.assertEqual(self.customer.balance, Decimal('50.00'))
+        self.assertEqual(self.product.stock, 1)
 
     def test_quantity_can_be_changed(self):
         self.login_customer()
@@ -117,6 +142,28 @@ class MarketplaceFlowTests(TestCase):
         item.refresh_from_db()
         self.assertEqual(item.quantity, 1)
 
+        # Quantity can never grow past the remaining stock.
+        self.product.stock = 1
+        self.product.save()
+        self.client.post(
+            reverse('update_cart_item', args=[item.pk]),
+            {'action': 'increase'}
+        )
+        item.refresh_from_db()
+        self.assertEqual(item.quantity, 1)
+
+    def test_out_of_stock_product_cannot_be_added(self):
+        self.product.stock = 0
+        self.product.save()
+
+        self.login_customer()
+        response = self.client.post(
+            reverse('add_to_cart', args=[self.product.pk])
+        )
+
+        self.assertRedirects(response, reverse('cart'))
+        self.assertEqual(CartItem.objects.count(), 0)
+
     def test_seller_cannot_use_the_cart(self):
         self.login_seller()
         response = self.client.post(
@@ -125,3 +172,25 @@ class MarketplaceFlowTests(TestCase):
 
         self.assertRedirects(response, reverse('home'))
         self.assertEqual(CartItem.objects.count(), 0)
+
+    def test_thank_you_page_is_private(self):
+        order = Order.objects.create(
+            customer=self.customer,
+            total_amount=Decimal('10.00')
+        )
+
+        other_user = User.objects.create_user(
+            username='customer2',
+            password='OtherPass123'
+        )
+        CustomerProfile.objects.create(
+            user=other_user,
+            phone='09120000001'
+        )
+
+        self.client.login(username='customer2', password='OtherPass123')
+        response = self.client.get(
+            reverse('checkout_success', args=[order.pk])
+        )
+
+        self.assertEqual(response.status_code, 404)

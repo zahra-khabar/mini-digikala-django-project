@@ -33,7 +33,7 @@ class OrderItem(models.Model):
     )
     product = models.ForeignKey(
         'stores.Product',
-        on_delete=models.CASCADE
+        on_delete=models.PROTECT
     )
     quantity = models.PositiveIntegerField()
     price = models.DecimalField(

@@ -349,3 +349,42 @@ hr {
 .qty-btn:hover {
     background: #e2e6ea;
 }
+
+/* ====== SEARCH ====== */
+.search-form {
+    display: flex;
+    gap: 10px;
+    margin: 15px 0 20px;
+    flex-wrap: wrap;
+}
+
+.search-form input[type="text"] {
+    flex: 1;
+    min-width: 200px;
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.search-form select {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    background: #fff;
+}
+
+/* ====== STOCK & CATEGORY ====== */
+.stock-info {
+    color: #1b5e20;
+    font-size: 0.85rem;
+}
+
+.out-of-stock {
+    color: #b3261e;
+    font-weight: 600;
+}
+
+.product-category {
+    color: #0077cc;
+    font-size: 0.85rem;
+}
