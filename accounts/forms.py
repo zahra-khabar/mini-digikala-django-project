@@ -1,5 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from .models import CustomerProfile, SellerProfile
 
 
@@ -25,6 +27,16 @@ class SignupForm(forms.Form):
             )
 
         return username
+
+    def clean_password1(self):
+        password1 = self.cleaned_data['password1']
+
+        try:
+            validate_password(password1)
+        except ValidationError as error:
+            raise forms.ValidationError(error.messages)
+
+        return password1
 
     def clean(self):
         cleaned_data = super().clean()
