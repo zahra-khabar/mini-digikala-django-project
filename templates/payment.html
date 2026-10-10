@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block title %}Payment | DijiKala{% endblock %}
+
+{% block content %}
+<h2>💳 Add Balance</h2>
+
+<form action="{% url 'payment' %}" method="post" class="payment-form">
+    {% csrf_token %}
+    <label for="amount">Enter amount:</label>
+    <input type="number" name="amount" id="amount" min="1" required>
+    <button type="submit" class="btn">Add Balance</button>
+</form>
+{% endblock %}

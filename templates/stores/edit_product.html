@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% block title %}Edit Product | DijiKala{% endblock %}
+{% block content %}
+<h2>✏️ Edit {{ product.name }}</h2>
+
+<form method="post" enctype="multipart/form-data" class="auth-form">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn">Save Changes</button>
+    <a href="{% url 'store_detail' store.id %}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

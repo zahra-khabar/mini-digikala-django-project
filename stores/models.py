@@ -1,12 +1,13 @@
 from django.db import models
-from django.contrib.auth.models import User
+from accounts.models import SellerProfile
 
 
 class Store(models.Model):
     name = models.CharField(max_length=200)
     owner = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE
+        SellerProfile,
+        on_delete=models.CASCADE,
+        related_name='stores'
     )
     description = models.TextField(blank=True)
     balance = models.DecimalField(
