@@ -6,6 +6,12 @@
 {% block content %}
 <h2>🛒 Latest Products</h2>
 
+<form method="get" action="{% url 'home' %}" class="search-form">
+    {{ search_form.q }}
+    {{ search_form.category }}
+    <button type="submit" class="btn">Search</button>
+</form>
+
 <div class="card-grid">
     {% for product in products %}
         <div class="card">
@@ -21,25 +27,33 @@
                     🏪 {{ product.store.name }}
                 </a>
             </p>
+            {% if product.category %}
+                <p class="product-category">🏷️ {{ product.category.name }}</p>
+            {% endif %}
             <p>{{ product.description|truncatewords:12 }}</p>
             <p><strong>${{ product.price }}</strong></p>
 
-            {% if user.is_authenticated %}
-                <form method="post"
-                      action="{% url 'add_to_cart' product.id %}">
-                    {% csrf_token %}
-                    <button type="submit" class="btn">
-                        Add to Cart
-                    </button>
-                </form>
+            {% if product.stock > 0 %}
+                <p class="stock-info">In stock: {{ product.stock }}</p>
+                {% if user.is_authenticated %}
+                    <form method="post"
+                          action="{% url 'add_to_cart' product.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn">
+                            Add to Cart
+                        </button>
+                    </form>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn">
+                        Login to Buy
+                    </a>
+                {% endif %}
             {% else %}
-                <a href="{% url 'login' %}" class="btn">
-                    Login to Buy
-                </a>
+                <p class="out-of-stock">Out of stock</p>
             {% endif %}
         </div>
     {% empty %}
-        <p>No products yet!</p>
+        <p>No products found.</p>
     {% endfor %}
 </div>
 {% endblock %}

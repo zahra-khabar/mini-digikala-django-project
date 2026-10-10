@@ -1,5 +1,6 @@
 from decimal import Decimal, InvalidOperation
 
+from django.contrib import messages
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -97,6 +98,7 @@ def payment_view(request):
         if amount.is_finite() and amount > 0:
             customer.balance += amount
             customer.save(update_fields=['balance'])
+            messages.success(request, 'Balance updated successfully.')
             return redirect('customer_panel')
 
     return render(
