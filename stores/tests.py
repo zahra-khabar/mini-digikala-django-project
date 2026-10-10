@@ -1,9 +1,15 @@
+import os
+import shutil
+import tempfile
 from decimal import Decimal
+from io import BytesIO
 
 from django.contrib.auth.models import User
+from django.core.files.uploadedfile import SimpleUploadedFile
 from django.core.management import call_command
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
+from PIL import Image as PILImage
 
 from accounts.models import CustomerProfile, SellerProfile
 from orders.models import Order, OrderItem
@@ -255,3 +261,127 @@ class StoreManagementTests(TestCase):
                 store__name='دیجی‌استور'
             ).exists()
         )
+
+
+class ProductImageUploadTests(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        owner_user = User.objects.create_user(
+            username='image_owner',
+            password='OwnerPass123'
+        )
+        cls.owner = SellerProfile.objects.create(user=owner_user)
+        cls.store = Store.objects.create(
+            name='Image Store',
+            owner=cls.owner
+        )
+
+    def setUp(self):
+        self.media_root = tempfile.mkdtemp()
+        self.override = override_settings(MEDIA_ROOT=self.media_root)
+        self.override.enable()
+        self.addCleanup(self.override.disable)
+        self.addCleanup(shutil.rmtree, self.media_root, True)
+
+    def login_owner(self):
+        self.client.login(
+            username='image_owner',
+            password='OwnerPass123'
+        )
+
+    def upload(self, name, payload, content_type):
+        return SimpleUploadedFile(
+            name,
+            payload,
+            content_type=content_type
+        )
+
+    def test_seller_can_upload_a_product_image(self):
+        self.login_owner()
+
+        buffer = BytesIO()
+        PILImage.new('RGB', (20, 20), 'blue').save(buffer, format='PNG')
+
+        response = self.client.post(
+            reverse('add_product', args=[self.store.pk]),
+            {
+                'name': 'Photo Product',
+                'price': '9.00',
+                'stock': '1',
+                'description': '',
+                'image': self.upload(
+                    'photo.png', buffer.getvalue(), 'image/png'
+                ),
+            }
+        )
+
+        product = Product.objects.get(name='Photo Product')
+        self.assertRedirects(
+            response,
+            reverse('store_detail', args=[self.store.pk])
+        )
+        self.assertTrue(product.image.name)
+        self.assertTrue(
+            product.image.storage.exists(product.image.name)
+        )
+
+    def test_oversized_image_is_rejected(self):
+        self.login_owner()
+
+        buffer = BytesIO()
+        image = PILImage.frombytes(
+            'RGB',
+            (1600, 1600),
+            os.urandom(1600 * 1600 * 3)
+        )
+        image.save(buffer, format='PNG')
+
+        response = self.client.post(
+            reverse('add_product', args=[self.store.pk]),
+            {
+                'name': 'Big Product',
+                'price': '9.00',
+                'stock': '1',
+                'description': '',
+                'image': self.upload(
+                    'big.png', buffer.getvalue(), 'image/png'
+                ),
+            }
+        )
+
+        self.assertEqual(response.status_code, 200)
+        self.assertFalse(
+            Product.objects.filter(name='Big Product').exists()
+        )
+        self.assertContains(response, 'حجم تصویر')
+
+    def test_heic_image_is_accepted(self):
+        try:
+            import pillow_heif  # noqa: F401
+        except ImportError:
+            self.skipTest('pillow-heif is not installed')
+
+        self.login_owner()
+
+        buffer = BytesIO()
+        PILImage.new('RGB', (20, 20), 'orange').save(buffer, format='HEIF')
+
+        response = self.client.post(
+            reverse('add_product', args=[self.store.pk]),
+            {
+                'name': 'HEIC Product',
+                'price': '9.00',
+                'stock': '1',
+                'description': '',
+                'image': self.upload(
+                    'photo.heic', buffer.getvalue(), 'image/heic'
+                ),
+            }
+        )
+
+        product = Product.objects.get(name='HEIC Product')
+        self.assertRedirects(
+            response,
+            reverse('store_detail', args=[self.store.pk])
+        )
+        self.assertTrue(product.image.name)

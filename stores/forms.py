@@ -5,7 +5,7 @@ from PIL import Image
 from .models import Category, Product, Store
 
 MAX_IMAGE_SIZE = 5 * 1024 * 1024
-ALLOWED_IMAGE_FORMATS = {'PNG', 'JPEG', 'WEBP'}
+ALLOWED_IMAGE_FORMATS = {'PNG', 'JPEG', 'WEBP', 'HEIF', 'AVIF'}
 
 
 class StoreForm(forms.ModelForm):
@@ -27,6 +27,13 @@ class StoreForm(forms.ModelForm):
 
 
 class ProductForm(forms.ModelForm):
+    image = forms.ImageField(
+        label='تصویر',
+        required=False,
+        widget=forms.ClearableFileInput,
+        help_text='فرمت‌های مجاز: PNG، JPEG، WebP و HEIC — حداکثر ۵ مگابایت',
+    )
+
     class Meta:
         model = Product
         fields = [
@@ -43,7 +50,6 @@ class ProductForm(forms.ModelForm):
             'stock': 'موجودی',
             'description': 'توضیحات',
             'category': 'دسته‌بندی',
-            'image': 'تصویر',
         }
         widgets = {
             'name': forms.TextInput(
@@ -84,7 +90,7 @@ class ProductForm(forms.ModelForm):
 
         if detected_format not in ALLOWED_IMAGE_FORMATS:
             raise forms.ValidationError(
-                'فقط تصاویر PNG، JPEG و WebP پذیرفته می‌شوند.'
+                'فقط تصاویر PNG، JPEG، WebP و HEIC پذیرفته می‌شوند.'
             )
 
         image.seek(0)
