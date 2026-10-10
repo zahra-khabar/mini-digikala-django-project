@@ -10,7 +10,7 @@
         <div class="card">
             <h3>{{ store.name }}</h3>
             <p>{{ store.description|truncatewords:15 }}</p>
-            <a href="{% url 'store_detail' store.id %}" class="btn">Manage Store</a>
+            <span class="btn">Manage Store</span>
         </div>
     {% empty %}
         <p>You have no stores yet.</p>

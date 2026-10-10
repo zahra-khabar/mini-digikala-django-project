@@ -18,10 +18,21 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import include, path
 from django.shortcuts import render
+from django.conf import settings
+from django.conf.urls.static import static
+from stores.models import Product
 
 
 def home(request):
-    return render(request, 'home.html')
+    products = Product.objects.select_related(
+        'store'
+    ).order_by('-created_at')[:8]
+
+    return render(
+        request,
+        'home.html',
+        {'products': products}
+    )
 
 
 urlpatterns = [
@@ -30,3 +41,8 @@ urlpatterns = [
     path('orders/', include('orders.urls')),
     path('', home, name='home'),
 ]
+if settings.DEBUG:
+    urlpatterns += static(
+        settings.MEDIA_URL,
+        document_root=settings.MEDIA_ROOT
+    )

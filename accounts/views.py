@@ -6,7 +6,8 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 
 from .forms import SignupForm
-from .models import CustomerProfile
+from .models import CustomerProfile, SellerProfile
+from stores.models import Store
 
 
 def signup_view(request):
@@ -59,6 +60,7 @@ def logout_view(request):
     return redirect('home')
 
 
+
 @login_required
 def customer_panel(request):
     customer = CustomerProfile.objects.filter(
@@ -66,7 +68,9 @@ def customer_panel(request):
     ).first()
 
     if customer is None:
-        return redirect('seller_panel')
+        if SellerProfile.objects.filter(user=request.user).exists():
+            return redirect('seller_panel')
+        return redirect('home')
 
     return render(
         request,
@@ -75,9 +79,21 @@ def customer_panel(request):
     )
 
 
+
 @login_required
 def seller_panel(request):
-    return render(request, 'seller_panel.html')
+    is_seller = SellerProfile.objects.filter(user=request.user).exists()
+
+    if not is_seller:
+        if CustomerProfile.objects.filter(user=request.user).exists():
+            return redirect('customer_panel')
+        return redirect('home')
+
+    stores = Store.objects.filter(owner=request.user)
+
+    return render(request, 'seller_panel.html', {
+        'stores': stores
+    })
 
 
 @login_required
