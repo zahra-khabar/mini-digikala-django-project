@@ -63,3 +63,9 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    @property
+    def has_image(self):
+        return bool(
+            self.image and self.image.storage.exists(self.image.name)
+        )

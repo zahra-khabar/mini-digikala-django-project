@@ -190,3 +190,17 @@ class StoreManagementTests(TestCase):
         )
         self.assertContains(response, 'Gaming Laptop')
         self.assertNotContains(response, 'Coffee Mug')
+
+    def test_missing_image_file_falls_back_to_placeholder(self):
+        Product.objects.create(
+            name='Broken Image Product',
+            price=Decimal('1.00'),
+            stock=1,
+            store=self.store,
+            image='products/missing.webp'
+        )
+
+        response = self.client.get(reverse('home'))
+
+        self.assertContains(response, 'No image available')
+        self.assertNotContains(response, 'products/missing.webp')

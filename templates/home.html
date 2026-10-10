@@ -15,7 +15,7 @@
 <div class="card-grid">
     {% for product in products %}
         <div class="card">
-            {% if product.image %}
+            {% if product.has_image %}
                 <img src="{{ product.image.url }}" alt="{{ product.name }}">
             {% else %}
                 <div class="product-image-placeholder">No image available</div>
